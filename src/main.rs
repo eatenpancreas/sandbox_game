@@ -7,8 +7,11 @@ use sandbox_engine::*;
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins, PixelBufferPlugin, 
-            SandboxPlugin, SandboxPhysicsPlugin
+            DefaultPlugins, PixelBufferPlugin,
+            SandboxPlugin {
+                size: UVec2::new(64, 64),
+                pixel_size: UVec2::new(8, 8),
+            }, SandboxPhysicsPlugin
         )).add_systems(Update, (
             click_debug, add_sand,
         ))

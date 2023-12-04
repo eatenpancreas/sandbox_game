@@ -10,7 +10,10 @@ pub use self::events::*;
 pub use self::physics::*;
 pub use self::grid::*;
 
-pub struct SandboxPlugin;
+pub struct SandboxPlugin {
+    pub size: UVec2,
+    pub pixel_size: UVec2
+}
 #[derive(Component)]
 pub struct Pixel;
 
@@ -22,11 +25,11 @@ pub enum PixelType {
 impl Plugin for SandboxPlugin {
     fn build(&self, app: &mut App) {
         let size = PixelBufferSize {
-            size: UVec2::new(32, 32),       // amount of pixels
-            pixel_size: UVec2::new(16, 16), // size of each pixel in the screen
+            size: self.size,       // amount of pixels
+            pixel_size: self.pixel_size, // size of each pixel in the screen
         };
 
-        let grid = Array2D::filled_with(None, 32, 32);
+        let grid = Array2D::filled_with(None, self.size.x as usize, self.size.y as usize);
 
         app
             .insert_resource(Events::<GridClickEvent>::default())
