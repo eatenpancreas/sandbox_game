@@ -1,13 +1,14 @@
 
 use bevy::prelude::*;
 use bevy_pixel_buffer::prelude::*;
-use sandbox_engine::{GridClickEvent, PixelType, SandboxPlugin, SetPixelEvent};
+use sandbox_engine::*;
 
 
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins, PixelBufferPlugin, SandboxPlugin
+            DefaultPlugins, PixelBufferPlugin, 
+            SandboxPlugin, SandboxPhysicsPlugin
         )).add_systems(Update, (
             click_debug, add_sand,
         ))
@@ -25,6 +26,8 @@ fn add_sand(
     mut set_pixel: EventWriter<SetPixelEvent>,
 ) {
     for GridClickEvent(vec) in ev_grid_click.read() {
-        set_pixel.send(SetPixelEvent(*vec, PixelType::Sand))
+        set_pixel.send(SetPixelEvent(
+            PixelEventType::Set((*vec, Some(PixelType::Sand)))
+        ))
     }
 }

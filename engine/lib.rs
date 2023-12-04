@@ -1,23 +1,22 @@
 mod events;
 mod pixel_type_matches;
+mod physics;
+mod grid;
 
 use array2d::Array2D;
 use bevy::prelude::*;
 use bevy_pixel_buffer::prelude::*;
 pub use self::events::*;
+pub use self::physics::*;
+pub use self::grid::*;
 
 pub struct SandboxPlugin;
-#[derive(Resource)]
-pub struct Grid(Array2D<Option<Entity>>);
-#[derive(Component)]
-pub struct GridPos(pub UVec2);
 #[derive(Component)]
 pub struct Pixel;
 
-#[derive(Debug)]
+#[derive(Debug, Component)]
 pub enum PixelType {
-    Sand, Stone, 
-    None
+    Sand, Stone,
 }
 
 impl Plugin for SandboxPlugin {
@@ -39,4 +38,10 @@ impl Plugin for SandboxPlugin {
                 click_on_grid, set_pixel
             ));
     }
+}
+
+
+pub fn start(mut pb: QueryPixelBuffer) {
+    // Set each pixel to a random color
+    pb.frame().per_pixel(|_, _| bevy_pixel_buffer::pixel::Pixel::from(Color::NONE));
 }

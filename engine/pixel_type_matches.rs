@@ -1,7 +1,8 @@
-use bevy::ecs::system::EntityCommands;
+
 use bevy::math::UVec2;
-use bevy::prelude::{Color, Commands};
+use bevy::prelude::{Color, Commands, Entity};
 use crate::{GridPos, Pixel, PixelType};
+use crate::physics::SandyPhysics;
 
 impl PixelType {
     pub(crate) fn to_col(&self) -> Color {
@@ -12,14 +13,14 @@ impl PixelType {
         }
     }
     
-    pub(crate) fn spawn(&self, cmd: &mut Commands, pos: UVec2) -> Option<EntityCommands> {
+    pub(crate) fn spawn(&self, cmd: &mut Commands, pos: &UVec2) -> Option<Entity> {
         match self {
             PixelType::Sand => Some(cmd.spawn((
-                Pixel, GridPos(pos)
-            ))),
+                Pixel, GridPos(*pos), SandyPhysics, PixelType::Sand
+            )).id()),
             PixelType::Stone => Some(cmd.spawn((
-                Pixel, GridPos(pos)
-            ))),
+                Pixel, GridPos(*pos), PixelType::Stone
+            )).id()),
             _ => None
         }
     }
