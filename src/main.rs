@@ -1,4 +1,4 @@
-use bevy::input::keyboard::KeyboardInput;
+
 use bevy::prelude::*;
 use bevy_pixel_buffer::prelude::*;
 use sandbox_engine::*;
@@ -21,39 +21,23 @@ fn main() {
         .run()
 }
 
-// fn click_debug(mut ev_grid_click: EventReader<GridClickEvent>) {
-//     for GridClickEvent(vec) in ev_grid_click.read() {
-//         println!("Clicked on {:?}", vec);
-//     }
-// }
-
 fn change_type(
     keyboard_input: Res<Input<KeyCode>>,
     mut current_type: ResMut<CurrentType>
 ) {
-    if keyboard_input.just_pressed(KeyCode::Key1) {
-        current_type.0 = PixelType::Sand;
-        println!("{:?}", current_type.0);
-    }
-    else if keyboard_input.just_pressed(KeyCode::Key2) {
-        current_type.0 = PixelType::Stone;
-        println!("{:?}", current_type.0);
-    }
-    else if keyboard_input.just_pressed(KeyCode::Key3) {
-        current_type.0 = PixelType::Water;
-        println!("{:?}", current_type.0);
-    }
-    else if keyboard_input.just_pressed(KeyCode::Key4) {
-        current_type.0 = PixelType::Metal;
-        println!("{:?}", current_type.0);
-    }
-    else if keyboard_input.just_pressed(KeyCode::Key5) {
-        current_type.0 = PixelType::Dirt;
-        println!("{:?}", current_type.0);
-    }
-    else if keyboard_input.just_pressed(KeyCode::Key6) {
-        current_type.0 = PixelType::Lava;
-        println!("{:?}", current_type.0);
+    for pr in keyboard_input.get_pressed() {
+        if let Some(p_type) = match pr {
+            KeyCode::Key1 => Some(PixelType::Sand),
+            KeyCode::Key2 => Some(PixelType::Stone),
+            KeyCode::Key3 => Some(PixelType::Water),
+            KeyCode::Key4 => Some(PixelType::Metal),
+            KeyCode::Key5 => Some(PixelType::Dirt),
+            KeyCode::Key6 => Some(PixelType::Lava),
+            _ => None
+        } {
+            current_type.0 = p_type;
+            println!("{:?}", p_type);
+        }
     }
 }
 
@@ -76,7 +60,7 @@ fn log_positions(
 fn add_sand(
     mut ev_grid_click: EventReader<GridClickEvent>,
     mut set_pixel: EventWriter<SetPixelEvent>,
-    mut current_type: Res<CurrentType>
+    current_type: Res<CurrentType>
 ) {
     for GridClickEvent(vec) in ev_grid_click.read() {
         set_pixel.send(SetPixelEvent(

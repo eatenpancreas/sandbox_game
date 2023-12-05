@@ -50,7 +50,7 @@ pub(crate) fn click_on_grid(
 pub(crate) fn set_pixel(
     mut r_pixel: EventReader<SetPixelEvent>,
     mut pb: QueryPixelBuffer,
-    mut q_pixel_type: Query<(Entity, &PixelType)>,
+    q_pixel_type: Query<(Entity, &PixelType)>,
     mut q_pixel_pos: Query<&mut GridPos>,
     mut grid: ResMut<Grid>,
     mut cmd: Commands
@@ -65,7 +65,7 @@ pub(crate) fn set_pixel(
             PixelEventType::Set((vec, pix)) => {
                 if let Some(pixel) = pix {
                     // This square now has a pixel
-                    if let Some(entity) = grid.0.get_mut(vec.x as usize, vec.y as usize)
+                    if let Some(_) = grid.0.get_mut(vec.x as usize, vec.y as usize)
                         .and_then(|x| x.as_mut()) {
                         
                         let _ = frame.set(*vec, pixel.to_col());

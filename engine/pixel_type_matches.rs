@@ -13,7 +13,6 @@ impl PixelType {
             PixelType::Metal => Color::GRAY,
             PixelType::Dirt => Color::SALMON,
             PixelType::Lava => Color::RED,
-            _ => Color::NONE
         }
     }
     
@@ -69,7 +68,6 @@ impl PixelType {
                 },
                 PixelType::Lava
             )).id()),
-            _ => None
         }
     }
 }

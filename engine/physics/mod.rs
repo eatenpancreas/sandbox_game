@@ -25,12 +25,12 @@ impl SandyPhysics {
             
             let new_y = (pos.0.y + 1).min(grid.0.num_rows() as u32 - 1);
             
-            if (sand_drop(&mut set_pixel, &grid, pos.0, pos.0.x, new_y)) {
+            if sand_drop(&mut set_pixel, &grid, pos.0, pos.0.x, new_y) {
                 continue;
             }
             
             let rn = rng.gen_range(0.0..1.0);
-            if phys.do_move_on_ground && rng.gen_range(0..3) < 1 {
+            if phys.do_move_on_ground && rng.gen_range(0..2) == 1 {
                 do_sand_drop_to_sides(&mut set_pixel, &grid, phys, pos, rn, pos.0.y);
             } else {
                 do_sand_drop_to_sides(&mut set_pixel, &grid, phys, pos, rn, new_y);
@@ -70,9 +70,8 @@ fn sand_drop(
 
 impl Plugin for SandboxPhysicsPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(Update, (
-                SandyPhysics::physics
-            ));
+        app.add_systems(Update, 
+            SandyPhysics::physics
+        );
     }
 }
