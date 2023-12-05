@@ -22,7 +22,7 @@ pub(crate) fn click_on_grid(
     q_buffer: Query<&PixelBuffer>,
     mut ev_grid_click: EventWriter<GridClickEvent>,
 ) {
-    if buttons.just_pressed(MouseButton::Left) {
+    if buttons.pressed(MouseButton::Left) {
         let window = q_window.single();
         let (camera, camera_transform) = q_camera.single();
 
