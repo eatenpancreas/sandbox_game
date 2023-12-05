@@ -21,7 +21,8 @@ pub struct Pixel;
 
 #[derive(Debug, Component, Copy, Clone)]
 pub enum PixelType {
-    Sand, Stone,
+    Sand, Stone, Water, Metal, Dirt,
+    Lava,
 }
 
 impl Plugin for SandboxPlugin {
