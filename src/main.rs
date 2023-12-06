@@ -33,11 +33,10 @@ fn change_type(
             KeyCode::Key4 => Some(PixelType::Metal),
             KeyCode::Key5 => Some(PixelType::Dirt),
             KeyCode::Key6 => Some(PixelType::Lava),
-            KeyCode::ShiftLeft => None,
+            KeyCode::Key0 => None,
             _ => break
         };
         current_type.0 = p_type;
-        
     }
 }
 
@@ -47,6 +46,7 @@ fn log_positions(
     mut commands: Commands
 ) {
     if keyboard_input.just_pressed(KeyCode::P) {
+        println!("Getting entities");
         for (i, ent) in grid.0.as_column_major().iter().enumerate() {
             if let Some(ent) = ent {    
                 println!("Entity {:?} found at Index {}, (x{}, y{}) ", ent, i, 
@@ -67,14 +67,18 @@ fn add_sand(
         set_pixel.send(SetPixelEvent(
             PixelEventType::Set((vec, current_type.0))
         ));
-        vec.x -= 1;
-        set_pixel.send(SetPixelEvent(
-            PixelEventType::Set((vec, current_type.0))
-        ));
-        vec.y -= 1;
-        set_pixel.send(SetPixelEvent(
-            PixelEventType::Set((vec, current_type.0))
-        ));
+        if vec.x > 0 {
+            vec.x -= 1;
+            set_pixel.send(SetPixelEvent(
+                PixelEventType::Set((vec, current_type.0))
+            ));
+        }
+        if vec.y > 0 {
+            vec.y -= 1;
+            set_pixel.send(SetPixelEvent(
+                PixelEventType::Set((vec, current_type.0))
+            ));
+        }
         vec.x += 1;
         set_pixel.send(SetPixelEvent(
             PixelEventType::Set((vec, current_type.0))

@@ -20,6 +20,7 @@ pub struct SandboxPlugin {
 pub struct Pixel;
 
 #[derive(Debug, Component, Copy, Clone)]
+#[derive(PartialEq)]
 pub enum PixelType {
     Sand, Stone, Water, Metal, Dirt,
     Lava,

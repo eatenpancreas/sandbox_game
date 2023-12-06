@@ -65,18 +65,21 @@ pub(crate) fn set_pixel(
             PixelEventType::Set((vec, pix)) => {
                 if let Some(pixel) = pix {
                     // This square now has a pixel
-                    if let Some(_) = grid.0.get_mut(vec.x as usize, vec.y as usize)
+                    if let Some(e) = grid.0.get_mut(vec.x as usize, vec.y as usize)
                         .and_then(|x| x.as_mut()) {
                         
-                        // cmd.entity(*e).despawn();
-                        // let entity = pixel.spawn(&mut cmd, vec);
-                        // grid.0.set(vec.x as usize, vec.y as usize, entity).unwrap();
-                        
-                        warn_on_err(frame.set(*vec, pixel.to_col()));
+                        if let Ok((_, pt)) = q_pixel_type.get(*e) {
+                            if (pt != pixel) {
+                                cmd.entity(*e).despawn();
+                                let entity = pixel.spawn(&mut cmd, vec);
+                                grid.0.set(vec.x as usize, vec.y as usize, entity).unwrap();
+                                warn_on_err(frame.set(*vec, pixel.to_col()));
+                            }
+                        }
                     } else {
                         let entity = pixel.spawn(&mut cmd, vec);
                         grid.0.set(vec.x as usize, vec.y as usize, entity).unwrap();
-                        warn_on_err(frame.set(*vec, pixel.to_col()))
+                        frame.set(*vec, pixel.to_col()).unwrap()
                     }
                 } else {
                     // No pixel given, meaning delete

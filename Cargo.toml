@@ -11,6 +11,7 @@ path = "./engine/lib.rs"
 
 [dependencies]
 bevy = "0.12.1"
+bevy_egui = "0.23.0"
 bevy_pixel_buffer = "0.6.0"
 array2d = "0.3.0"
 rand = "0.8.5"

@@ -2,8 +2,7 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::*;
 use rand::Rng;
-use log::debug;
-use crate::{Grid, GridPos, PixelEventType, SetPixelEvent};
+use crate::{Grid, GridPos, PixelEventType, PixelType, SetPixelEvent};
 
 pub struct SandboxPhysicsPlugin;
 #[derive(Component)]
@@ -11,6 +10,15 @@ pub struct SandyPhysics {
     pub(crate) disperse_chance: f32,
     pub(crate) do_move_on_ground: bool,
     pub(crate) weight: u16,
+}
+
+#[derive(Component)]
+pub struct ReactivePhysics {
+    pub(crate) reacts_to: Vec<(Option<PixelType>, Reaction)>
+}
+
+pub enum Reaction {
+    ChangeInto(Option<PixelType>)
 }
 
 #[derive(Component)]
@@ -39,7 +47,7 @@ impl SandyPhysics {
                 continue;
             }
             
-            if phys.do_move_on_ground && rng.gen_range(0..2) == 1 {
+            if phys.do_move_on_ground && rng.gen_range(0..4) > 1 {
                 do_sand_drop_to_sides(&mut set_pixel, &q_pass, &grid, phys, pos, rn, pos.0.y);
             } else if new_y > pos.0.y {
                 do_sand_drop_to_sides(&mut set_pixel, &q_pass, &grid, phys, pos, rn, new_y);
