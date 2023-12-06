@@ -70,12 +70,14 @@ pub fn start(
         let mult = buf.pixel_buffer.size.size * buf.pixel_buffer.size.pixel_size;
 
         cmd.spawn(SpriteBundle {
-            sprite: Sprite{
-                color: Color::DARK_GRAY,
-                ..default()
-            },
+            sprite: Sprite{ color: Color::DARK_GRAY, ..default() },
             transform: Transform::from_scale(mult.as_vec2().extend(0.)),
             ..default()
         });
     }
+}
+
+
+pub(crate) fn warn_on_err<I, T>(res: Result<I, T>) where T: ToString {
+    if let Err(res) = res { warn!("{}", res.to_string()) }
 }

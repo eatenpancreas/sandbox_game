@@ -2,7 +2,7 @@ use array2d::Array2D;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_pixel_buffer::prelude::*;
-use crate::{Grid, GridPos, PixelType};
+use crate::{Grid, GridPos, PixelType, warn_on_err};
 
 #[derive(Event, Debug)]
 pub struct GridClickEvent(pub UVec2);
@@ -68,18 +68,22 @@ pub(crate) fn set_pixel(
                     if let Some(_) = grid.0.get_mut(vec.x as usize, vec.y as usize)
                         .and_then(|x| x.as_mut()) {
                         
-                        let _ = frame.set(*vec, pixel.to_col());
+                        // cmd.entity(*e).despawn();
+                        // let entity = pixel.spawn(&mut cmd, vec);
+                        // grid.0.set(vec.x as usize, vec.y as usize, entity).unwrap();
+                        
+                        warn_on_err(frame.set(*vec, pixel.to_col()));
                     } else {
                         let entity = pixel.spawn(&mut cmd, vec);
-                        let _ = grid.0.set(vec.x as usize, vec.y as usize, entity);
-                        let _ = frame.set(*vec, pixel.to_col());
+                        grid.0.set(vec.x as usize, vec.y as usize, entity).unwrap();
+                        warn_on_err(frame.set(*vec, pixel.to_col()))
                     }
                 } else {
                     // No pixel given, meaning delete
                     if let Some(e) = gain(&mut grid.0, vec) {
                         
                         cmd.entity(e).despawn();
-                        let _ = frame.set(*vec, Color::NONE);
+                        warn_on_err(frame.set(*vec, Color::NONE));
                     }
                 }
             }
@@ -92,16 +96,16 @@ pub(crate) fn set_pixel(
                     |e| q_pixel_type.get(e).ok()).unzip();
                 
                 if let Some(from_e) = from_e {
-                    let _ = q_pixel_pos.get_mut(from_e).and_then(|mut e| { e.0 = *to; Ok(()) });
+                    warn_on_err(q_pixel_pos.get_mut(from_e).and_then(|mut e| { e.0 = *to; Ok(()) }));
                 }
                 if let Some(to_e) = to_e {
-                    let _ = q_pixel_pos.get_mut(to_e).and_then(|mut e| { e.0 = *from; Ok(()) });
+                    warn_on_err(q_pixel_pos.get_mut(to_e).and_then(|mut e| { e.0 = *from; Ok(()) }));
                 }
-                
-                let _ = grid.0.set(to.x as usize, to.y as usize, from_e);
-                let _ = frame.set(*to, from_pix.and_then(|pix| Some(pix.to_col())).unwrap_or(Color::NONE));
-                let _ = grid.0.set(from.x as usize, from.y as usize, to_e);
-                let _ = frame.set(*from, to_pix.and_then(|pix| Some(pix.to_col())).unwrap_or(Color::NONE));
+
+                grid.0.set(to.x as usize, to.y as usize, from_e).unwrap();
+                warn_on_err(frame.set(*to, from_pix.and_then(|pix| Some(pix.to_col())).unwrap_or(Color::NONE)));
+                grid.0.set(from.x as usize, from.y as usize, to_e).unwrap();
+                warn_on_err(frame.set(*from, to_pix.and_then(|pix| Some(pix.to_col())).unwrap_or(Color::NONE)));
             }
         }
     }

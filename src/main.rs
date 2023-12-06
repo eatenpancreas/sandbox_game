@@ -4,7 +4,7 @@ use bevy_pixel_buffer::prelude::*;
 use sandbox_engine::*;
 
 #[derive(Resource, Copy, Clone)]
-struct CurrentType(PixelType);
+struct CurrentType(Option<PixelType>);
 
 fn main() {
     App::new()
@@ -17,7 +17,7 @@ fn main() {
         )).add_systems(Update, (
             add_sand, change_type, log_positions
         ))
-        .insert_resource(CurrentType(PixelType::Sand))
+        .insert_resource(CurrentType(Some(PixelType::Sand)))
         .run()
 }
 
@@ -26,18 +26,18 @@ fn change_type(
     mut current_type: ResMut<CurrentType>
 ) {
     for pr in keyboard_input.get_pressed() {
-        if let Some(p_type) = match pr {
+        let p_type = match pr {
             KeyCode::Key1 => Some(PixelType::Sand),
             KeyCode::Key2 => Some(PixelType::Stone),
             KeyCode::Key3 => Some(PixelType::Water),
             KeyCode::Key4 => Some(PixelType::Metal),
             KeyCode::Key5 => Some(PixelType::Dirt),
             KeyCode::Key6 => Some(PixelType::Lava),
-            _ => None
-        } {
-            current_type.0 = p_type;
-            println!("{:?}", p_type);
-        }
+            KeyCode::ShiftLeft => None,
+            _ => break
+        };
+        current_type.0 = p_type;
+        
     }
 }
 
@@ -63,8 +63,21 @@ fn add_sand(
     current_type: Res<CurrentType>
 ) {
     for GridClickEvent(vec) in ev_grid_click.read() {
+        let mut vec = *vec;
         set_pixel.send(SetPixelEvent(
-            PixelEventType::Set((*vec, Some(current_type.0)))
-        ))
+            PixelEventType::Set((vec, current_type.0))
+        ));
+        vec.x -= 1;
+        set_pixel.send(SetPixelEvent(
+            PixelEventType::Set((vec, current_type.0))
+        ));
+        vec.y -= 1;
+        set_pixel.send(SetPixelEvent(
+            PixelEventType::Set((vec, current_type.0))
+        ));
+        vec.x += 1;
+        set_pixel.send(SetPixelEvent(
+            PixelEventType::Set((vec, current_type.0))
+        ));
     }
 }
