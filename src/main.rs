@@ -1,5 +1,6 @@
 
 use bevy::prelude::*;
+use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use bevy_pixel_buffer::prelude::*;
 use sandbox_engine::*;
 
@@ -9,16 +10,31 @@ struct CurrentType(Option<PixelType>);
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins, PixelBufferPlugin,
+            DefaultPlugins, PixelBufferPlugin, EguiPlugin,
             SandboxPlugin {
                 size: UVec2::new(256, 256),
                 pixel_size: UVec2::new(2, 2),
             }, SandboxPhysicsPlugin
         )).add_systems(Update, (
-            add_sand, change_type, log_positions
+            add_sand, change_type, log_positions, pixel_type_ui
         ))
         .insert_resource(CurrentType(Some(PixelType::Sand)))
         .run()
+}
+
+fn pixel_type_ui(
+    mut contexts: EguiContexts
+) {
+    let ctx = contexts.ctx_mut();
+    let mut new_type = None;
+    
+    egui::SidePanel::left("left-panel")
+        .resizable(false)
+        .show(ctx, |ui| {
+            ui.label("Panel");
+            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
+            if ui.button("Sand").clicked() { new_type = Some(Some(PixelType::Sand));}
+        });
 }
 
 fn change_type(
@@ -78,10 +94,10 @@ fn add_sand(
             set_pixel.send(SetPixelEvent(
                 PixelEventType::Set((vec, current_type.0))
             ));
+            vec.x += 1;
+            set_pixel.send(SetPixelEvent(
+                PixelEventType::Set((vec, current_type.0))
+            ));
         }
-        vec.x += 1;
-        set_pixel.send(SetPixelEvent(
-            PixelEventType::Set((vec, current_type.0))
-        ));
     }
 }

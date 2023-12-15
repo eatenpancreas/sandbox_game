@@ -79,6 +79,10 @@ pub fn start(
 }
 
 
-pub(crate) fn warn_on_err<I, T>(res: Result<I, T>) where T: ToString {
-    if let Err(res) = res { warn!("{}", res.to_string()) }
+pub(crate) fn warn_on_err<T, E>(res: Result<T, E>) -> Option<T> where E: ToString {
+    match res {
+        Ok(i) => Some(i),
+        Err(e) => { warn!("{}", e.to_string()); return None }
+    }
 }
+

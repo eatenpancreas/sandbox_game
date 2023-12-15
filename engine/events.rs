@@ -30,9 +30,13 @@ pub(crate) fn click_on_grid(
             .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
         {
             for buffer in q_buffer.iter() {
-                let mut grid_position = (world_position /
+                let grid_position = (world_position /
                     buffer.size.pixel_size.as_vec2()
-                    + (buffer.size.size.as_vec2() / 2.0)).floor().as_uvec2();
+                    + (buffer.size.size.as_vec2() / 2.0)).floor();
+                
+                if grid_position.x < 0. || grid_position.y < 0. { return; }
+                
+                let mut grid_position = grid_position.as_uvec2();
 
                 let y = buffer.size.size.y as i32 - grid_position.y as i32 - 1;
                 if y >= 0 {
@@ -50,7 +54,7 @@ pub(crate) fn click_on_grid(
 pub(crate) fn set_pixel(
     mut r_pixel: EventReader<SetPixelEvent>,
     mut pb: QueryPixelBuffer,
-    q_pixel_type: Query<(Entity, &PixelType)>,
+    q_pixel_type: Query<&PixelType>,
     mut q_pixel_pos: Query<&mut GridPos>,
     mut grid: ResMut<Grid>,
     mut cmd: Commands
@@ -68,7 +72,7 @@ pub(crate) fn set_pixel(
                     if let Some(e) = grid.0.get_mut(vec.x as usize, vec.y as usize)
                         .and_then(|x| x.as_mut()) {
                         
-                        if let Ok((_, pt)) = q_pixel_type.get(*e) {
+                        if let Ok(pt) = q_pixel_type.get(*e) {
                             if (pt != pixel) {
                                 cmd.entity(*e).despawn();
                                 let entity = pixel.spawn(&mut cmd, vec);
@@ -77,6 +81,7 @@ pub(crate) fn set_pixel(
                             }
                         }
                     } else {
+                        
                         let entity = pixel.spawn(&mut cmd, vec);
                         grid.0.set(vec.x as usize, vec.y as usize, entity).unwrap();
                         frame.set(*vec, pixel.to_col()).unwrap()
@@ -92,26 +97,45 @@ pub(crate) fn set_pixel(
             }
             
             // --- swap two pixels --- //
-            PixelEventType::Swap(from, to) => {
-                let (from_e, from_pix) = gain(&mut grid.0, from).and_then(
-                    |e| q_pixel_type.get(e).ok()).unzip();
-                let (to_e, to_pix)= gain(&mut grid.0, to).and_then(
-                    |e| q_pixel_type.get(e).ok()).unzip();
+            PixelEventType::Swap(from_pt, to_pt) => {
+                let from = get_e_and_pt(&mut grid, from_pt, &q_pixel_type);
+                let to = get_e_and_pt(&mut grid, to_pt, &q_pixel_type);
                 
-                if let Some(from_e) = from_e {
-                    warn_on_err(q_pixel_pos.get_mut(from_e).and_then(|mut e| { e.0 = *to; Ok(()) }));
-                }
-                if let Some(to_e) = to_e {
-                    warn_on_err(q_pixel_pos.get_mut(to_e).and_then(|mut e| { e.0 = *from; Ok(()) }));
-                }
-
-                grid.0.set(to.x as usize, to.y as usize, from_e).unwrap();
-                warn_on_err(frame.set(*to, from_pix.and_then(|pix| Some(pix.to_col())).unwrap_or(Color::NONE)));
-                grid.0.set(from.x as usize, from.y as usize, to_e).unwrap();
-                warn_on_err(frame.set(*from, to_pix.and_then(|pix| Some(pix.to_col())).unwrap_or(Color::NONE)));
+                set_from_swap(&mut q_pixel_pos, &mut grid, &mut frame, from, *to_pt);
+                set_from_swap(&mut q_pixel_pos, &mut grid, &mut frame, to, *from_pt);
             }
         }
     }
+}
+
+fn set_from_swap(
+    q_pixel_pos: &mut Query<&mut GridPos>,
+    grid: &mut ResMut<Grid>,
+    frame: &mut Frame,
+    swap: Option<(Entity, PixelType)>,
+    set_to_point: UVec2,
+) {
+    if let Some((e, col)) = swap {
+        warn_on_err(q_pixel_pos.get_mut(e).and_then(|mut e| { e.0 = set_to_point; Ok(()) }));
+        grid.0.set(set_to_point.x as usize, set_to_point.y as usize, Some(e)).unwrap();
+        warn_on_err(frame.set(set_to_point, col.to_col()));
+    } else {
+        grid.0.set(set_to_point.x as usize, set_to_point.y as usize, None).unwrap();
+        warn_on_err(frame.set(set_to_point, Color::NONE));
+    }
+}
+
+fn get_e_and_pt(
+    grid: &mut Grid,
+    pos: &UVec2,
+    q_pixel_type: &Query<&PixelType>
+) -> Option<(Entity, PixelType)> {
+    if let Some(e) = gain(&mut grid.0, pos) {
+        if let Some(pt) = warn_on_err(q_pixel_type.get(e)) {
+            return Some((e, *pt));
+        }
+    }
+    None
 }
 
 fn gain(

@@ -10,7 +10,7 @@ impl PixelType {
         match self {
             Sand => Color::hex("#ECC713").unwrap(),
             Stone => Color::hex("#B8C7CF").unwrap(),
-            Water => Color::hex("#1338EC").unwrap(),
+            Water => Color::hex("#1ECBE1").unwrap(),
             Metal => Color::hex("#8B97B0").unwrap(),
             Dirt => Color::hex("#D4926A").unwrap(),
             Lava => Color::hex("#FF4355").unwrap(),
